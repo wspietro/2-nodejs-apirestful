@@ -9,8 +9,10 @@ app.get('/hello', () => {
   return 'Hello nodejs'
 })
 
-app.listen({
-  port: 3333
-}).then(() => {
-  console.log('Server running');
-})
+app
+  .listen({
+    port: 3333,
+  })
+  .then(() => {
+    console.log('Server running')
+  })
