@@ -1,11 +1,16 @@
-interface User {
-  birthYear: number
-}
+import fastify from 'fastify'
 
-function calculateAgeOfUser(user: User) {
-  return new Date().getFullYear() - user.birthYear
-}
+const app = fastify()
 
-calculateAgeOfUser({
-  birthYear: 1994
+// criando primeira rota
+// http://localhost:3333/hello
+
+app.get('/hello', () => {
+  return 'Hello nodejs'
+})
+
+app.listen({
+  port: 3333
+}).then(() => {
+  console.log('Server running');
 })
