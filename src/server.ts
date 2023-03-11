@@ -7,9 +7,11 @@ const app = fastify()
 // http://localhost:3333/hello
 
 app.get('/hello', async () => {
-  const tables = await knex('sqlite_schema').select('*')
+  const transaction = await knex('transactions')
+    .where('amount', 100)
+    .select('*')
 
-  return tables
+  return transaction
 })
 
 app
