@@ -1,13 +1,13 @@
 import fastify from 'fastify'
 import { env } from './env'
-import { transactionsRoutes } from './routes/transaction'
+import { transactionsRoutes } from './routes/transactions'
 
 const app = fastify()
 
-// criando primeira rota
-// http://localhost:3333/hello
-
-app.register(transactionsRoutes)
+// fastify plugin
+app.register(transactionsRoutes, {
+  prefix: 'transactions',
+})
 
 app
   .listen({
