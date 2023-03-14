@@ -2,35 +2,68 @@ import { randomUUID } from 'node:crypto'
 import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { knex } from '../database'
+import { checkSessionIdExists } from '../middlewares/check-session-id-exists'
 
 // fastify plugin
 // route prefix: transactions
 export async function transactionsRoutes(app: FastifyInstance) {
-  app.get('/', async (request, reply) => {
-    const transactions = await knex('transactions').select()
+  app.get(
+    '/',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, reply) => {
+      const { sessionId } = request.cookies
 
-    return { transactions }
-  })
+      const transactions = await knex('transactions')
+        .where('session_id', sessionId)
+        .select()
 
-  app.get('/:id', async (request, reply) => {
-    const getTransactionParamsSchema = z.object({
-      id: z.string().uuid(),
-    })
+      return { transactions }
+    },
+  )
 
-    const { id } = getTransactionParamsSchema.parse(request.params)
+  app.get(
+    '/:id',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, reply) => {
+      const getTransactionParamsSchema = z.object({
+        id: z.string().uuid(),
+      })
 
-    const transaction = await knex('transactions').where('id', id).first() // first não retorna array
+      const { id } = getTransactionParamsSchema.parse(request.params)
 
-    return { transaction }
-  })
+      const { sessionId } = request.cookies
 
-  app.get('/summary', async () => {
-    const summary = await knex('transactions')
-      .sum('amount', { as: 'amount' })
-      .first()
+      const transaction = await knex('transactions')
+        .where({
+          session_id: sessionId,
+          id,
+        })
+        .first() // first não retorna array
 
-    return { summary }
-  })
+      return { transaction }
+    },
+  )
+
+  app.get(
+    '/summary',
+    {
+      preHandler: [checkSessionIdExists],
+    },
+    async (request, reply) => {
+      const { sessionId } = request.cookies
+
+      const summary = await knex('transactions')
+        .where('session_id', sessionId)
+        .sum('amount', { as: 'amount' })
+        .first()
+
+      return { summary }
+    },
+  )
 
   app.post('/', async (request, reply) => {
     // Given any Zod schema, you can call its .parse method to check data is valid. If it is, a value is returned with full type information! Otherwise, an error is thrown.
