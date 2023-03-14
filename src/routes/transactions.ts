@@ -3,12 +3,6 @@ import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { knex } from '../database'
 
-const createTransactionBodySchema = z.object({
-  title: z.string(),
-  amount: z.number(),
-  type: z.enum(['credit', 'debit']),
-})
-
 // fastify plugin
 // route prefix: transactions
 export async function transactionsRoutes(app: FastifyInstance) {
@@ -30,10 +24,24 @@ export async function transactionsRoutes(app: FastifyInstance) {
     return { transaction }
   })
 
+  app.get('/summary', async () => {
+    const summary = await knex('transactions')
+      .sum('amount', { as: 'amount' })
+      .first()
+
+    return { summary }
+  })
+
   app.post('/', async (request, reply) => {
     // Given any Zod schema, you can call its .parse method to check data is valid. If it is, a value is returned with full type information! Otherwise, an error is thrown.
     // retorna erro na validacao do schema (se houver)
     // tratativa de erros
+    const createTransactionBodySchema = z.object({
+      title: z.string(),
+      amount: z.number(),
+      type: z.enum(['credit', 'debit']),
+    })
+
     const { title, amount, type } = createTransactionBodySchema.parse(
       request.body,
     )
