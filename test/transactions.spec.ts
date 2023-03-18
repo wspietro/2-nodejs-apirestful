@@ -1,6 +1,7 @@
-import { it, expect, beforeAll, afterAll, describe } from 'vitest'
+import { it, expect, beforeAll, afterAll, describe, beforeEach } from 'vitest'
 import request from 'supertest'
 import { app } from '../src/app'
+import { execSync } from 'node:child_process'
 
 // contexto
 describe('Traansactions routes', () => {
@@ -10,6 +11,12 @@ describe('Traansactions routes', () => {
 
   afterAll(async () => {
     await app.close() // remover app da memoria
+  })
+
+  beforeEach(() => {
+    // execSync executa comandos no terminal por dentro do app node
+    execSync('npm run knex migrate:rollback --all')
+    execSync('npm run knex migrate:latest')
   })
 
   it('should be able to create a new transaction', async () => {

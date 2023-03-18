@@ -1,6 +1,12 @@
-import 'dotenv/config' // export valores .env em process.env (global)
+import { config } from 'dotenv' // export valores .env em process.env (global)
 
 import { z } from 'zod'
+
+if (process.env.NODE_ENV === 'test') {
+  config({ path: '.env.test' })
+} else {
+  config()
+}
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('production'), // geralmente informado automaticamente, ambiente que estamos executando
