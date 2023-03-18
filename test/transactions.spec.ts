@@ -27,4 +27,30 @@ describe('Traansactions routes', () => {
 
     expect(response.statusCode).toEqual(201)
   })
+
+  it('should be able to list all transactions', async () => {
+    const transactionMock = {
+      title: 'New Transaction',
+      amount: 5000,
+      type: 'credit',
+    }
+
+    const createTransactionResponse = await request(app.server)
+      .post('/transactions')
+      .send(transactionMock)
+
+    const cookies = createTransactionResponse.get('Set-Cookie')
+
+    const listTransactionsResponse = await request(app.server)
+      .get('/transactions')
+      .set('Cookie', cookies)
+      .expect(200)
+
+    expect(listTransactionsResponse.body.transactions).toEqual([
+      expect.objectContaining({
+        title: 'New Transaction',
+        amount: 5000,
+      }),
+    ])
+  })
 })
